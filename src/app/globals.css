@@ -1,0 +1,226 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Custom CSS for Realty Focus */
+@layer components {
+  .property-tag {
+    @apply bg-realty-green text-white px-3 py-1 text-xs rounded-sm absolute top-3 left-3;
+  }
+
+  .btn-primary {
+    @apply bg-realty-red text-white px-4 py-2 rounded-sm hover:bg-opacity-90 transition-all;
+  }
+
+  .btn-secondary {
+    @apply bg-realty-navy text-white px-4 py-2 rounded-sm hover:bg-opacity-90 transition-all;
+  }
+
+  .section-heading {
+    @apply text-2xl md:text-3xl font-semibold text-center mb-8 relative;
+  }
+
+  .section-heading::after {
+    content: '';
+    @apply block h-1 w-16 bg-realty-red mx-auto mt-3;
+  }
+
+  .footer-heading {
+    @apply text-lg font-semibold mb-4 text-white relative;
+  }
+
+  .footer-heading::after {
+    content: '';
+    @apply block h-1 w-8 bg-realty-red mt-2;
+  }
+}
+
+/* Specific Layout Components */
+.header-navigation {
+  @apply bg-white shadow-md;
+}
+
+.nav-link {
+  @apply hover:text-realty-red transition-colors;
+}
+
+.nav-link.active {
+  @apply text-realty-red;
+}
+
+.property-card {
+  @apply bg-white shadow-md hover:shadow-lg transition-shadow;
+}
+
+.property-price {
+  @apply text-realty-red font-bold;
+}
+
+.footer-section {
+  @apply bg-realty-darkNavy text-white py-12;
+}
+
+.footer-link {
+  @apply hover:text-realty-red transition-colors;
+}
+
+/* Form elements */
+.form-input {
+  @apply border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-realty-red;
+}
+
+.form-select {
+  @apply border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-realty-red;
+}
+
+.form-textarea {
+  @apply border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-realty-red;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+.single-property-overview .info-box {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 40px;
+  row-gap: 30px;
+}
+
+.info-box {
+  background: #ffffff;
+  border-radius: 12px;
+}
+
+.single-property-overview .info-box .item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 151px;
+}
+
+.info-box .item .box-icon {
+  border-radius: 8px;
+  border: 1px solid #e4e4e4;
+}
+
+.box-icon.w-52 {
+  width: 52px;
+  height: 52px;
+}
+
+.single-property-overview .info-box .item .label {
+  color: #5c6368;
+  font-weight: 400;
+  display: block;
+  opacity: 0.8;
+}
+
+.single-property-overview .info-box .item span {
+  font-weight: 600;
+}
+
+.single-property-overview .info-box .item .box-icon {
+  border-radius: 8px;
+  border: 1px solid #e4e4e4;
+}
+
+.single-property-overview .info-box .item .box-icon svg {
+  width: 30px;
+}
+
+.single-property-overview .info-box .item .content {
+  max-width: 150px;
+}
+
+.box-icon.w-52 {
+  width: 52px;
+  height: 52px;
+}
+
+.box-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-transition: all 0.3s ease;
+  -moz-transition: all 0.3s ease;
+  -ms-transition: all 0.3s ease;
+  -o-transition: all 0.3s ease;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}

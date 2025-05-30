@@ -289,11 +289,15 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
 }
 
 // ✅ Generate Static Params
-export async function generateStaticParams(): Promise<{ slug: string }[]> {
-  const res = await fetch('http://localhost:4000/api/microsites', { cache: 'no-store' });
+export async function generateStaticParams() {
+  const res = await fetch('http://localhost:4000/api/microsites');
+  if (!res.ok) {
+    return [];
+  }
   const data = await res.json();
-  const projects = Array.isArray(data) ? data : data.data;
-  return projects
-    .filter((p) => typeof p.name === 'string' && p.name.trim())
-    .map((p) => ({ slug: p.name.toLowerCase().replace(/\s+/g, '-') }));
+
+  return data.map((project: { name: string }) => ({
+    slug: project.name.toLowerCase().replace(/\s+/g, '-'),
+  }));
 }
+

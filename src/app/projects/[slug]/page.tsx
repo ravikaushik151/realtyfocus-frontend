@@ -1,4 +1,3 @@
-'use client'; // Add this line if you're using any client-side features like useRouter or useState
 
 import React from 'react';
 import Image from 'next/image';

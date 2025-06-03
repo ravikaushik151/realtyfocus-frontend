@@ -1,3 +1,5 @@
+'use client'; // Add this line if you're using any client-side features like useRouter or useState
+
 import React from 'react';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
@@ -7,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHouse, faKey, faBed, faHammer, faArrowsAlt } from '@fortawesome/free-solid-svg-icons';
 
+// Types
 interface Project {
   id: number;
   title: string;
@@ -15,22 +18,29 @@ interface Project {
   configuration: string;
   area: string;
   possession: string;
-  price: string[];
+  price: Array<{
+    type: string;
+    sqft: string;
+    price: number;
+    basic_cost: number;
+  }>;
   imageUrls: string[];
-  builderLogo: string;
-  builderName: string;
-  category: string;
-  amenities: string[];
-  specifications: { [key: string]: string };
   galleryimageUrls: string[];
   masterPlan: string;
   floorPlanimageUrls: string[];
   amenitiesimageUrls: string[];
+  builderLogo: string;
+  builderName: string;
+  category: string;
+  amenities: Array<{ name: string; image: string }>;
+  specifications: { [key: string]: string };
   slug: string;
 }
 
+// Update Props to include searchParams (required by Next.js)
 interface ProjectDetailPageProps {
   params: { slug: string };
+  searchParams?: { [key: string]: string | string[] | undefined };
 }
 
 // Helper to convert CSV to image URL array
@@ -42,9 +52,9 @@ const toUrlArray = (csv: string, base: string): string[] =>
     })
     : [];
 
+// Main Page Component
 export default async function ProjectDetailPage({ params }: ProjectDetailPageProps) {
   const { slug } = params;
-
   const res = await fetch(`http://localhost:4000/api/microsites/${slug}`, {
     next: { revalidate: 60 },
   });
@@ -87,13 +97,12 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
     floorPlanimageUrls: Array.isArray(floorplan) ? floorplan.map(fp => BASE.floorPlan + fp.image) : [],
     amenitiesimageUrls: Array.isArray(amenities) ? amenities.map(am => BASE.amenities + am.image) : [],
     builderLogo: details.mlogo ? BASE.builder + details.mlogo : '',
-    builderName: details.builderName ?? "House of Hiranandani", // Use fallback if dynamic not present
+    builderName: details.builderName ?? "House of Hiranandani",
     category: rawData.project_type ?? '',
-    amenities: Array.isArray(amenities) ? amenities.map(am => am.name) : [],
-    specifications: details.specifications ?? {}, // Optional: provide actual object in API
+    amenities: Array.isArray(amenities) ? amenities : [],
+    specifications: details.specifications ?? {},
   };
 
-  //console.log("Project Details:", floorplan); // Debugging line
   return (
     <RootLayout>
       {/* Header Banner */}
@@ -148,7 +157,11 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                   {amenities.map((am, idx) => (
                     <div key={idx} className="text-center">
                       <Image
-                        src={BASE.amenities + am.image}
+                        src={
+                          am.image.includes('https://storage.googleapis.com/')
+                            ? am.image
+                            : `https://realtyfocus.info/images/amenities/${am.image}`
+                        }
                         alt={am.name}
                         width={100}
                         height={100}
@@ -160,6 +173,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                 </div>
               )}
 
+              {/* Specifications */}
               {project.specifications && Object.keys(project.specifications).length > 0 && (
                 <div className="bg-white p-6 rounded-md shadow-md" id="specifications">
                   <h2 className="text-xl font-bold mb-4 text-realty-navy">Specifications</h2>
@@ -173,7 +187,6 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                   </div>
                 </div>
               )}
-
 
               {/* Master Plan */}
               {project.masterPlan && (
@@ -197,7 +210,11 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                     {floorplan.map((url, idx) => (
                       <Image
                         key={idx}
-                        src={BASE.floorPlan + `${url.image}`}
+                        src={
+                          url.image.includes('https://storage.googleapis.com/')
+                            ? url.image
+                            : `https://realtyfocus.info/images/floor_plan/${url.image}`
+                        }
                         alt={`Floor plan ${idx + 1}`}
                         width={800}
                         height={600}
@@ -208,10 +225,10 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                 </div>
               )}
 
-              {/* Floor Price Section */}
+              {/* Pricing Table */}
               {Array.isArray(project.price) && project.price.length > 0 && (
                 <div className="bg-white p-6 rounded shadow my-6" id="floor-price">
-                  <h2 className="text-xl font-bold mb-4 text-realty-navy"> Pricing</h2>
+                  <h2 className="text-xl font-bold mb-4 text-realty-navy">Pricing</h2>
                   <table className="min-w-full table-auto border border-gray-200 text-center">
                     <thead>
                       <tr className="bg-gray-100 text-center">
@@ -235,21 +252,25 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                 </div>
               )}
 
-
               {/* Gallery */}
               <div className="bg-white p-6 rounded shadow my-6" id='gallery'>
                 <h2 className="text-xl font-bold mb-4 text-realty-navy">Gallery</h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {project.galleryimageUrls?.map((url, index) => (
-                    <Image
-                      key={index}
-                      src={url}
-                      alt={`Gallery image ${index + 1}`}
-                      width={500}
-                      height={300}
-                      className="rounded object-cover w-full h-48"
-                    />
-                  ))}
+                  {project.galleryimageUrls?.map((url, index) => {
+                    const finalUrl = url.startsWith('https://storage.googleapis.com/')
+                      ? url
+                      : `${url}`;
+                    return (
+                      <Image
+                        key={index}
+                        src={finalUrl}
+                        alt={`Gallery image ${index + 1}`}
+                        width={800}
+                        height={600}
+                        className="rounded w-full object-contain"
+                      />
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -288,16 +309,14 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   );
 }
 
-// ✅ Generate Static Params
+// Generate Static Params for Dynamic Routes
 export async function generateStaticParams() {
   const res = await fetch('http://localhost:4000/api/microsites');
   if (!res.ok) {
     return [];
   }
   const data = await res.json();
-
   return data.map((project: { name: string }) => ({
     slug: project.name.toLowerCase().replace(/\s+/g, '-'),
   }));
 }
-

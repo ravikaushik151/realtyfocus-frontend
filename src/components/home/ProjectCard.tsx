@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBuilding, faBed, faRulerCombined, faClock } from '@fortawesome/free-solid-svg-icons';
 
+const IMAGE_BASE_URL = "https://realtyfocus.info/images/";
 
 const ProjectCard = ({ project }) => {
     return (
@@ -12,10 +13,18 @@ const ProjectCard = ({ project }) => {
             {/* Header */}
             <div className="relative">
                 {/* New Launch Tag */}
-                <span className="absolute top-0 left-0 bg-red-600 text-white px-4 py-1 rounded-br-lg">{project.category}</span>
+                <span className="absolute top-0 left-0 bg-red-600 text-white px-4 py-1 rounded-br-lg">
+                    {project.category?.toUpperCase()}
+                </span>
+
+
                 {/* Image */}
                 <Image
-                    src={project.imageUrl}
+                    src={
+                        project.imageUrl?.startsWith("https://storage.googleapis.com/")
+                            ? project.imageUrl
+                            : IMAGE_BASE_URL + 'fimage/' + project.imageUrl
+                    }
                     alt={project.title}
                     width={500}
                     height={300}
@@ -30,29 +39,37 @@ const ProjectCard = ({ project }) => {
             {/* Content */}
             <div className="p-4 relative">
                 {/* Title */}
-                <h2 className="text-xl font-bold mb-2">{project.title}</h2>
+                <h2 className="text-xl font-bold mb-2">
+                    {project.title
+                        ? project.title
+                            .toLowerCase()
+                            .split(' ')
+                            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                            .join(' ')
+                        : ''}
+                </h2>
                 {/* Subtitle - Builder Name */}
                 <p className="text-gray-600 mb-2 flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM3.854 20.146a5 5 0 006.792 0l1.854-1.854m0 0a5 5 0 00-6.792 0l-1.854 1.854m19.646 0A5 5 0 0118 16v1a3 3 0 01-3 3H7a3 3 0 01-3-3V7a3 3 0 013-3h4" />
-                    </svg>
-                    Godrej Properties
+                    <FontAwesomeIcon icon={faBuilding} className="w-4 h-4 mr-1 text-red-500" />
+                    {project.buildername}
                 </p>
                 {/* Location */}
                 <p className="flex items-center text-gray-600 mb-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 12.414 17.657 8.172a4 4 0 015.656 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.879 16.121A3 3 0 0012 15c.142 0 .285.01.427.022" />
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 21c-4.97-5.82-7-9.12-7-12a7 7 0 1114 0c0 2.88-2.03 6.18-7 12z" />
+                        <circle cx="12" cy="10" r="3" />
                     </svg>
-                    {project.location}
+                    {project.location
+                        ? project.location
+                            .toLowerCase()
+                            .split(' ')
+                            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                            .join(' ')
+                        : ''}
                 </p>
 
                 {/* Features */}
-                <ul className="list-none text-gray-600 mb-4 space-y-2">
-                    <li className="flex items-center text-sm">
-                        <FontAwesomeIcon icon={faBuilding} className="w-4 h-4 mr-1 text-red-500" />
-                        Apartment
-                    </li>
+                <ul className="list-none text-gray-600 mt-4 mb-4 space-y-2">
                     <li className="flex items-center text-sm">
                         <FontAwesomeIcon icon={faBed} className="w-4 h-4 mr-1 text-blue-500" />
                         {project.configuration}
@@ -63,7 +80,7 @@ const ProjectCard = ({ project }) => {
                     </li>
                     <li className="flex items-center text-sm">
                         <FontAwesomeIcon icon={faClock} className="w-4 h-4 mr-1 text-yellow-500" />
-                        Announcing - Soon
+                        {project.possession}
                     </li>
                 </ul>
 

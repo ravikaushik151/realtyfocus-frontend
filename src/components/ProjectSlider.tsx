@@ -29,7 +29,7 @@ export default function ProjectSlider({
                     <div className="relative block w-full h-full aspect-video">
                         {url && (
                             <Image
-                                src={url}
+                                src={url.startsWith('https://storage.googleapis.com/') ? url : `${url}`}
                                 alt={`${title} - Slide ${index + 1}`}
                                 fill
                                 className="object-cover"

@@ -1,65 +1,92 @@
 // components/FeaturedProjects.tsx
+'use client';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import 'swiper/css';
+import 'swiper/css/pagination';
+import { Pagination } from 'swiper/modules';
+import ProjectCard from '@/components/home/ProjectCard';
 
-import React from 'react';
-import ProjectCard from './ProjectCard';
+export default function FeaturedProjects() {
+  const [trendingProjects, setTrendingProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-// Mock Data for Projects
-const featuredProjects = [
-  {
-    id: 1,
-    title: 'LODHA MIRABELLE',
-    location: 'MANYATA TECH PARK, BANGALORE',
-    configuration: '2.5, 3&4 BHK',
-    area: '1350 SQ. FT. - 2500 SQ. FT.',
-    possession: 'Jan-2028',
-    price: '₹ 1.49 Cr - ₹ 2.8 Cr',
-    imageUrl: '/images/projects/project1.jpeg',
-    builderLogo: '/images/builder-logo.jpeg',
-    category: 'RESIDENTIAL APARTMENT',
-    slug: 'lodha-mirabelle'
-  },
-  {
-    id: 2,
-    title: 'PROVIDENT DEANSGATE',
-    location: 'KEMPALINGAPURA, BANGALORE',
-    configuration: '3 BHKTOWNHOUSES',
-    area: '1700 SQ. FT. - 2300 SQ. FT.',
-    possession: 'Jan-2028',
-    price: '₹ 1.8 Cr - ₹ 2 Cr',
-    imageUrl: '/images/projects/project2.jpeg',
-    builderLogo: '/images/builder-logo.jpeg',
-    category: 'RESIDENTIAL VILLAS',
-    slug: 'provident-deansgate'
-  },
-  {
-    id: 3,
-    title: 'URBAN SANCTUM',
-    location: 'SARJAPUR ROAD, BANGALORE',
-    configuration: 'LUXURY VILLA PLOTS',
-    area: '1200 SQ. FT. - 2400 SQ. FT.',
-    possession: 'Jan-2026',
-    price: '₹ 1.21 Cr - ₹ 2.42 Cr',
-    imageUrl: '/images/projects/project3.png',
-    builderLogo: '/images/builder-logo.jpeg',
-    category: 'RESIDENTIAL PLOT AND VILLAS',
-    slug: 'urban-sanctum'
+  useEffect(() => {
+    axios.get('http://localhost:4000/api/microsites/all')
+      .then((res) => {
+        // Filter only trending projects
+        const filtered = res.data
+          .filter((project) => project.project_type === 'featured')
+        setTrendingProjects(filtered);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    return <div className="text-center py-10">Loading...</div>;
   }
-];
 
-const FeaturedProjects = () => {
   return (
-    <section className="py-16 bg-gray-50">
+    <section className="py-16 container">
       <div className="container mx-auto px-4">
-        <h2 className="text-3xl font-bold text-center mb-10">FEATURED PROJECTS</h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {featuredProjects.map((project) => (
-            <ProjectCard key={project.id} project={project} />
-          ))}
+        <div className="text-center mb-4">
+          <div className="text-sm font-medium text-realty-red uppercase tracking-wider">
+            APARTMENTS FOR SALE
+          </div>
         </div>
+        <h2 className="section-heading">FEATURED PROJECTS</h2>
+
+        <Swiper
+          modules={[Pagination]}
+          spaceBetween={30}
+          slidesPerView={1}
+          pagination={{ clickable: true }}
+          breakpoints={{
+            640: { slidesPerView: 1 },
+            768: { slidesPerView: 2 },
+            1024: { slidesPerView: 3 },
+          }}
+        >
+          {trendingProjects.slice(0, 9).map((project) => (
+            <SwiperSlide key={project.micro_id}>
+              <ProjectCard project={{
+                title: project.name,
+                location: project.location
+                  ?.toLowerCase()
+                  .split(' ')
+                  .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                  .join(' '),
+                category: project.type?.toUpperCase() || 'N/A',
+                configuration: project.rooms?.replace(/(<([^>]+)>)/gi, '') || 'N/A',
+                area: project.min_sqft && project.max_sqft ? `${project.min_sqft} - ${project.max_sqft} sq.ft.` : 'N/A',
+                possession: project.possession
+                  ? new Date(project.possession).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }).replace(/ /g, '-')
+                  : 'TBA',
+                price: project.min_basic_cost && project.max_basic_cost
+                  ? `₹ ${shortenPrice(project.min_basic_cost)} - ₹ ${shortenPrice(project.max_basic_cost)}`
+                  : 'Price on Request',
+                imageUrl: project.featured_image,
+                buildername: project.builder_name || '',
+                slug: project.name?.toLowerCase().replace(/\s+/g, '-'),
+                project_type: 'Featured'
+              }} />
+            </SwiperSlide>
+          ))}
+        </Swiper>
       </div>
     </section>
   );
-};
+}
 
-export default FeaturedProjects;
+function shortenPrice(value) {
+  const num = parseFloat(value);
+  if (isNaN(num)) return value;
+  if (num >= 10000000) return (num / 10000000).toFixed(2) + ' Cr';
+  if (num >= 100000) return (num / 100000).toFixed(2) + ' L';
+  return num;
+}

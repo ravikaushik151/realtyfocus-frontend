@@ -224,3 +224,23 @@ html {
   transition: all 0.3s ease;
   cursor: pointer;
 }
+
+/* trending-swiper.css */
+.swiper-pagination {
+  bottom: 0px !important;
+  text-align: center;
+}
+
+.swiper-pagination-bullet {
+  width: 10px;
+  height: 10px;
+  background-color: #d1d5db;
+  /* gray-300 */
+  opacity: 1;
+  margin: 0 4px;
+}
+
+.swiper-pagination-bullet-active {
+  background-color: #dc2626 !important;
+  /* red-600 */
+}

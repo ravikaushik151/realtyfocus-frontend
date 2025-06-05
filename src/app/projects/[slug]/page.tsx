@@ -49,22 +49,22 @@ export type ProjectDetailPageProps = {
 
 
 // Helper to convert CSV to image URL array
-const toUrlArray = (csv, base) =>
-  csv
-    ? csv.split(',').map(idOrUrl => {
-      const trimmed = idOrUrl.trim();
-      if (trimmed.startsWith("http")) return trimmed;
-      const hasValidExtension = /\.(jpg|jpeg|png|webp)$/i.test(trimmed);
-      return `${base}${trimmed}${hasValidExtension ? '' : '.jpg'}`;
-    }).filter(url => url)
-    : [];
+const toUrlArray = (csv: string, base: string): string[] => {
+  if (!csv) return [];
+  return csv.split(',').map(idOrUrl => {
+    const trimmed = idOrUrl.trim();
+    if (trimmed.startsWith("http")) return trimmed;
+    const hasValidExtension = /\.(jpg|jpeg|png|webp)$/i.test(trimmed);
+    return `${base}${trimmed}${hasValidExtension ? '' : '.jpg'}`;
+  }).filter(url => url);
+};
 
 // Main Page Component
 export default async function ProjectDetailPage({ params }: ProjectDetailPageProps) {
   const { slug } = await params;
 
   // Fetch data
-  const res = await fetch(`http://localhost:4000/api/microsites/${slug}`, {
+  const res = await fetch(`https://api.realtyfocus.info/api/microsites/${slug}`, {
     next: { revalidate: 60 },
   });
 
@@ -287,9 +287,8 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
 export async function generateStaticParams() {
   const res = await fetch('https://api.realtyfocus.info/api/microsites');
   if (!res.ok) return [];
-
   const data = await res.json();
-  return data.map((project) => ({
-    slug: project.name.toLowerCase().replace(/\s+/g, '-'),
+  return data.map(project => ({
+    slug: project.name.toLowerCase().replace(/\s+/g, '-')
   }));
 }

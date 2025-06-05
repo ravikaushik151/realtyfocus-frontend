@@ -43,7 +43,7 @@ interface Project {
 
 interface ProjectDetailPageProps {
   params: { slug: string };
-  searchParams?: { [key: string]: string | string[] | undefined };
+  //searchParams?: { [key: string]: string | string[] | undefined };
 }
 
 // Helper to convert CSV to image URL array
@@ -69,7 +69,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   const { slug } = await params;
 
   // Fetch data
-  const res = await fetch(`http://localhost:4000/api/microsites/${slug}`, {
+  const res = await fetch(`https://api.realtyfocus.info/api/microsites/${slug}`, {
     next: { revalidate: 60 },
   });
 
@@ -290,7 +290,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
 
 // Generate Static Params for Dynamic Routes
 export async function generateStaticParams() {
-  const res = await fetch('http://localhost:4000/api/microsites');
+  const res = await fetch('https://api.realtyfocus.info/api/microsites');
   if (!res.ok) return [];
 
   const data = await res.json();

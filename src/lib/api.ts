@@ -4,7 +4,7 @@ export interface MicrositeData {
 }
 
 export async function fetchMicrosites(): Promise<MicrositeData[]> {
-    const res = await fetch('http://localhost:4000/api/microsites/');
+    const res = await fetch('https://api.realtyfocus.info/api/microsites/');
     if (!res.ok) {
         throw new Error('Failed to fetch microsites');
     }

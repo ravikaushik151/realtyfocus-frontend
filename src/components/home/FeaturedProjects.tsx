@@ -13,7 +13,7 @@ export default function FeaturedProjects() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get('http://localhost:4000/api/microsites/all')
+    axios.get('https://api.realtyfocus.info/api/microsites/all')
       .then((res) => {
         // Filter only trending projects
         const filtered = res.data

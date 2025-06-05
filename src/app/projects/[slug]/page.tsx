@@ -1,3 +1,4 @@
+// app/project/[slug]/page.tsx
 import React from 'react';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
@@ -6,7 +7,11 @@ import ProjectSlider from '@/components/ProjectSlider';
 import { Button } from '@/components/ui/button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHouse, faKey, faBed, faHammer, faArrowsAlt } from '@fortawesome/free-solid-svg-icons';
-import EnquiryForm from '@/components/EnquiryForm';
+
+// Components
+import Gallery from '@/components/microsite/Gallery';
+import FloorPlan from '@/components/microsite/FloorPlan';
+import MasterPlanImage from '@/components/microsite/MasterPlan';
 
 // Types
 interface Project {
@@ -36,24 +41,34 @@ interface Project {
   slug: string;
 }
 
-// Update Props to include searchParams (required by Next.js)
 interface ProjectDetailPageProps {
   params: { slug: string };
   searchParams?: { [key: string]: string | string[] | undefined };
 }
 
 // Helper to convert CSV to image URL array
-const toUrlArray = (csv: string, base: string): string[] =>
-  csv
-    ? csv.split(',').map(id => {
-      const trimmed = id.trim();
-      return base + (trimmed.endsWith('.jpg') ? trimmed : `${trimmed}.jpg`);
+const toUrlArray = (csv, base) => {
+  if (!csv) return [];
+  return csv
+    .split(',')
+    .map(idOrUrl => {
+      const trimmed = idOrUrl.trim();
+
+      if (trimmed.startsWith("http")) {
+        return trimmed;
+      }
+
+      const hasValidExtension = /\.(jpg|jpeg|png|webp)$/i.test(trimmed);
+      return `${base}${trimmed}${hasValidExtension ? '' : '.jpg'}`;
     })
-    : [];
+    .filter(url => url);
+};
 
 // Main Page Component
 export default async function ProjectDetailPage({ params }: ProjectDetailPageProps) {
-  const { slug } = params;
+  const { slug } = await params;
+
+  // Fetch data
   const res = await fetch(`http://localhost:4000/api/microsites/${slug}`, {
     next: { revalidate: 60 },
   });
@@ -92,9 +107,13 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
     price: Array.isArray(rawData.price) ? rawData.price : [],
     imageUrls: toUrlArray(details.slider_image, BASE.slider),
     galleryimageUrls: toUrlArray(details.gallery_image, BASE.gallery),
-    masterPlan: details.masterplan_image ? BASE.masterPlan + details.masterplan_image : '',
-    floorPlanimageUrls: Array.isArray(floorplan) ? floorplan.map(fp => BASE.floorPlan + fp.image) : [],
-    amenitiesimageUrls: Array.isArray(amenities) ? amenities.map(am => BASE.amenities + am.image) : [],
+    masterPlan: details.masterplan_image || '',
+    floorPlanimageUrls: Array.isArray(floorplan)
+      ? floorplan.map(fp => BASE.floorPlan + fp.image)
+      : [],
+    amenitiesimageUrls: Array.isArray(amenities)
+      ? amenities.map(am => BASE.amenities + am.image)
+      : [],
     builderLogo: details.mlogo ? BASE.builder + details.mlogo : '',
     builderName: details.builderName ?? "House of Hiranandani",
     category: rawData.project_type ?? '',
@@ -116,7 +135,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
               </div>
             </div>
             <div className="mt-4 md:mt-0">
-              <div className="text-2xl font-bold">price here</div>
+              <div className="text-2xl font-bold">Price here</div>
             </div>
           </div>
         </div>
@@ -128,6 +147,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Left Column */}
             <div className="md:col-span-2">
+              {/* Slider */}
               <div className="relative aspect-video overflow-hidden rounded-md mb-6">
                 <ProjectSlider title={project.title} imageUrls={project.imageUrls} />
               </div>
@@ -136,11 +156,41 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
               <div className="bg-white p-6 rounded-md shadow-md mb-6 single-property-overview">
                 <h2 className="text-xl font-bold mb-4 text-realty-navy">Overview</h2>
                 <ul className="info-box">
-                  <li className="item"><div className="box-icon w-52"><FontAwesomeIcon icon={faHouse} /></div><div className="content"><span className="label">Configuration:</span><span>{project.configuration}</span></div></li>
-                  <li className="item"><div className="box-icon w-52"><FontAwesomeIcon icon={faKey} /></div><div className="content"><span className="label">Possession:</span><span>{project.possession}</span></div></li>
-                  <li className="item"><div className="box-icon w-52"><FontAwesomeIcon icon={faBed} /></div><div className="content"><span className="label">Builder:</span><span>{project.builderName}</span></div></li>
-                  <li className="item"><div className="box-icon w-52"><FontAwesomeIcon icon={faHammer} /></div><div className="content"><span className="label">Year Built:</span><span>2024</span></div></li>
-                  <li className="item"><div className="box-icon w-52"><FontAwesomeIcon icon={faArrowsAlt} /></div><div className="content"><span className="label">Area:</span><span>{project.area}</span></div></li>
+                  <li className="item">
+                    <div className="box-icon w-52"><FontAwesomeIcon icon={faHouse} /></div>
+                    <div className="content">
+                      <span className="label">Configuration:</span>
+                      <span>{project.configuration}</span>
+                    </div>
+                  </li>
+                  <li className="item">
+                    <div className="box-icon w-52"><FontAwesomeIcon icon={faKey} /></div>
+                    <div className="content">
+                      <span className="label">Possession:</span>
+                      <span>{project.possession}</span>
+                    </div>
+                  </li>
+                  <li className="item">
+                    <div className="box-icon w-52"><FontAwesomeIcon icon={faBed} /></div>
+                    <div className="content">
+                      <span className="label">Builder:</span>
+                      <span>{project.builderName}</span>
+                    </div>
+                  </li>
+                  <li className="item">
+                    <div className="box-icon w-52"><FontAwesomeIcon icon={faHammer} /></div>
+                    <div className="content">
+                      <span className="label">Year Built:</span>
+                      <span>2024</span>
+                    </div>
+                  </li>
+                  <li className="item">
+                    <div className="box-icon w-52"><FontAwesomeIcon icon={faArrowsAlt} /></div>
+                    <div className="content">
+                      <span className="label">Area:</span>
+                      <span>{project.area}</span>
+                    </div>
+                  </li>
                 </ul>
               </div>
 
@@ -167,6 +217,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                         className="rounded mx-auto object-contain"
                       />
                       <p className="text-sm mt-2">{am.name}</p>
+                      <p className="text-sm mt-2">{am.details}</p>
                     </div>
                   ))}
                 </div>
@@ -174,7 +225,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
 
               {/* Specifications */}
               {project.specifications && Object.keys(project.specifications).length > 0 && (
-                <div className="bg-white p-6 rounded-md shadow-md" id="specifications">
+                <div className="bg-white p-6 rounded-md shadow-md mb-6" id="specifications">
                   <h2 className="text-xl font-bold mb-4 text-realty-navy">Specifications</h2>
                   <div className="space-y-4">
                     {Object.entries(project.specifications).map(([key, value]) => (
@@ -188,95 +239,47 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
               )}
 
               {/* Master Plan */}
-              {project.masterPlan && (
-                <div className="bg-white p-6 rounded shadow my-6" id='master-plan'>
-                  <h2 className="text-xl font-bold mb-4 text-realty-navy">Master Plan</h2>
-                  <Image
-                    src={project.masterPlan}
-                    alt="Master Plan"
-                    width={1000}
-                    height={600}
-                    className="rounded w-full object-contain"
-                  />
-                </div>
-              )}
+              <MasterPlanImage imageUrl={project.masterPlan} />
 
               {/* Floor Plans */}
-              {floorplan?.length > 0 && (
-                <div className="bg-white p-6 rounded shadow my-6" id='floor-plan'>
-                  <h2 className="text-xl font-bold mb-4 text-realty-navy">Floor Plans</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {floorplan.map((url, idx) => (
-                      <Image
-                        key={idx}
-                        src={
-                          url.image.includes('https://storage.googleapis.com/')
-                            ? url.image
-                            : `https://realtyfocus.info/images/floor_plan/${url.image}`
-                        }
-                        alt={`Floor plan ${idx + 1}`}
-                        width={800}
-                        height={600}
-                        className="rounded w-full object-contain"
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Pricing Table */}
-              {Array.isArray(project.price) && project.price.length > 0 && (
-                <div className="bg-white p-6 rounded shadow my-6" id="floor-price">
-                  <h2 className="text-xl font-bold mb-4 text-realty-navy">Pricing</h2>
-                  <table className="min-w-full table-auto border border-gray-200 text-center">
-                    <thead>
-                      <tr className="bg-gray-100 text-center">
-                        <th className="px-4 py-2 border">Type</th>
-                        <th className="px-4 py-2 border">Area (sqft)</th>
-                        <th className="px-4 py-2 border">Price/sqft (₹)</th>
-                        <th className="px-4 py-2 border">Basic Cost (₹)</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {project.price.map((item, index) => (
-                        <tr key={index} className="border-t">
-                          <td className="px-4 py-2 border">{item.type}</td>
-                          <td className="px-4 py-2 border">{item.sqft}</td>
-                          <td className="px-4 py-2 border">₹{item.price.toLocaleString()}</td>
-                          <td className="px-4 py-2 border">₹{item.basic_cost.toLocaleString()}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+              <div className="bg-white p-6 rounded shadow my-6" id='floor-plan'>
+                <h2 className="text-xl font-bold mb-4 text-realty-navy">Floor Plans</h2>
+                <FloorPlan floorplan={floorplan} />
+              </div>
 
               {/* Gallery */}
               <div className="bg-white p-6 rounded shadow my-6" id='gallery'>
                 <h2 className="text-xl font-bold mb-4 text-realty-navy">Gallery</h2>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {project.galleryimageUrls?.map((url, index) => {
-                    const finalUrl = url.startsWith('https://storage.googleapis.com/')
-                      ? url
-                      : `${url}`;
-                    return (
-                      <Image
-                        key={index}
-                        src={finalUrl}
-                        alt={`Gallery image ${index + 1}`}
-                        width={800}
-                        height={600}
-                        className="rounded w-full object-contain"
-                      />
-                    );
-                  })}
-                </div>
+                <Gallery urls={project.galleryimageUrls} />
               </div>
             </div>
 
             {/* Right Column - Contact */}
             <div>
-              <EnquiryForm />
+              <div className="bg-white p-6 rounded-md shadow-md sticky top-4">
+                <h2 className="text-xl font-bold mb-4 text-realty-navy">Enquire Now</h2>
+                <form className="space-y-4">
+                  <div>
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                    <input id="name" type="text" className="form-input" placeholder="Enter your name" />
+                  </div>
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input id="email" type="email" className="form-input" placeholder="Enter your email" />
+                  </div>
+                  <div>
+                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                    <input id="phone" type="tel" className="form-input" placeholder="Enter your phone number" />
+                  </div>
+                  <div>
+                    <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">Message</label>
+                    <textarea id="message" rows={4} className="form-textarea" placeholder="Enter your message"></textarea>
+                  </div>
+                  <Button className="w-full bg-realty-red hover:bg-realty-red/90 text-white">
+                    Submit Enquiry
+                  </Button>
+                </form>
+              </div>
             </div>
           </div>
         </div>
@@ -288,11 +291,10 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
 // Generate Static Params for Dynamic Routes
 export async function generateStaticParams() {
   const res = await fetch('http://localhost:4000/api/microsites');
-  if (!res.ok) {
-    return [];
-  }
+  if (!res.ok) return [];
+
   const data = await res.json();
-  return data.map((project: { name: string }) => ({
+  return data.map((project) => ({
     slug: project.name.toLowerCase().replace(/\s+/g, '-'),
   }));
 }

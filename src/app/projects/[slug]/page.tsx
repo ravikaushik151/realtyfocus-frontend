@@ -41,35 +41,30 @@ interface Project {
   slug: string;
 }
 
-interface ProjectDetailPageProps {
-  params: { slug: string };
-  //searchParams?: { [key: string]: string | string[] | undefined };
-}
+export type ProjectDetailPageProps = {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
+
+
 
 // Helper to convert CSV to image URL array
-const toUrlArray = (csv, base) => {
-  if (!csv) return [];
-  return csv
-    .split(',')
-    .map(idOrUrl => {
+const toUrlArray = (csv, base) =>
+  csv
+    ? csv.split(',').map(idOrUrl => {
       const trimmed = idOrUrl.trim();
-
-      if (trimmed.startsWith("http")) {
-        return trimmed;
-      }
-
+      if (trimmed.startsWith("http")) return trimmed;
       const hasValidExtension = /\.(jpg|jpeg|png|webp)$/i.test(trimmed);
       return `${base}${trimmed}${hasValidExtension ? '' : '.jpg'}`;
-    })
-    .filter(url => url);
-};
+    }).filter(url => url)
+    : [];
 
 // Main Page Component
 export default async function ProjectDetailPage({ params }: ProjectDetailPageProps) {
   const { slug } = await params;
 
   // Fetch data
-  const res = await fetch(`https://api.realtyfocus.info/api/microsites/${slug}`, {
+  const res = await fetch(`http://localhost:4000/api/microsites/${slug}`, {
     next: { revalidate: 60 },
   });
 

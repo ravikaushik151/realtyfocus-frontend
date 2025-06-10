@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import RootLayout from '@/components/layout/RootLayout';
+import Image from 'next/image';
 
 // Helper function to format image URLs
 const toImageUrl = (imagePath: string | undefined): string => {
@@ -77,7 +78,7 @@ export default async function BuilderDetailPage({ params }: { params: { slug: st
                     {/* Builder Header */}
                     <div className="row align-items-center mb-4">
                         <div className="col-md-3 text-center">
-                            <img
+                            <Image
                                 src={toImageUrl(builder.logo)}
                                 alt={builder.name || "Builder Logo"}
                                 className="img-fluid rounded shadow-sm"

@@ -129,7 +129,6 @@ export default function BuilderList() {
                         )}
                     </div>
 
-                    {/* Pagination */}
                     {/* Smart Pagination */}
                     <div className="flex justify-center mt-10">
                         <nav className="inline-flex space-x-2">
@@ -145,12 +144,11 @@ export default function BuilderList() {
                             {(() => {
                                 const sidePages = 2; // Show 2 before & after current
                                 const buttons = [];
-                                const totalPagesToShow = 7; // Max visible buttons including ellipses
+                                const totalPagesToShow = 7;
 
-                                let start = Math.max(2, page - sidePages);
-                                let end = Math.min(totalPages - 1, page + sidePages);
+                                const start = Math.max(2, page - sidePages);
+                                const end = Math.min(totalPages - 1, page + sidePages);
 
-                                // Always show first page
                                 buttons.push(
                                     <Link
                                         key={1}
@@ -162,16 +160,10 @@ export default function BuilderList() {
                                     </Link>
                                 );
 
-                                // Add ellipsis between first and middle
                                 if (start > 2) {
-                                    buttons.push(
-                                        <span key="dots-start" className="px-3 py-2">
-                                            ...
-                                        </span>
-                                    );
+                                    buttons.push(<span key="dots-start" className="px-3 py-2">...</span>);
                                 }
 
-                                // Render nearby pages
                                 for (let i = start; i <= end; i++) {
                                     buttons.push(
                                         <Link
@@ -185,16 +177,10 @@ export default function BuilderList() {
                                     );
                                 }
 
-                                // Add ellipsis before last page if needed
                                 if (end < totalPages - 1) {
-                                    buttons.push(
-                                        <span key="dots-end" className="px-3 py-2">
-                                            ...
-                                        </span>
-                                    );
+                                    buttons.push(<span key="dots-end" className="px-3 py-2">...</span>);
                                 }
 
-                                // Always show last page
                                 if (totalPages > 1) {
                                     buttons.push(
                                         <Link
@@ -214,7 +200,8 @@ export default function BuilderList() {
                             {/* Next Button */}
                             <Link
                                 href={`/builders?page=${page + 1}`}
-                                className={`px-3 py-2 rounded ${page >= totalPages ? 'text-gray-400 pointer-events-none' : 'hover:bg-gray-100'}`}
+                                className={`px-3 py-2 rounded ${page >= totalPages ? 'text-gray-400 pointer-events-none' : 'hover:bg-gray-100'
+                                    }`}
                             >
                                 Next
                             </Link>

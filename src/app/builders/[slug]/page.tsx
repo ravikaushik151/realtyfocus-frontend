@@ -27,6 +27,11 @@ interface BuilderApiResponse {
     ongoing_projects?: number | null;
 }
 
+export type BuilderDetailPageProps = {
+    params: Promise<{ slug: string }>;
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
+
 // ⬇️ Required for `output: export`
 export async function generateStaticParams() {
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/api';
@@ -70,8 +75,16 @@ async function getBuilderBySlug(slug: string): Promise<BuilderApiResponse | null
     }
 }
 
-export default async function BuilderDetailPage({ params }: { params: { slug: string } }) {
-    const builder = await getBuilderBySlug(params.slug);
+
+export default async function BuilderDetailPage({ params }: BuilderDetailPageProps) {
+
+
+    const { slug } = await params;
+
+    // You can also await searchParams if needed
+    // const resolvedSearchParams = await searchParams;
+
+    const builder = await getBuilderBySlug(slug);
 
     if (!builder) {
         return (

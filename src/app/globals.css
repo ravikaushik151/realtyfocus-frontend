@@ -244,3 +244,11 @@ html {
   background-color: #dc2626 !important;
   /* red-600 */
 }
+
+.marker {
+  width: 25px;
+}
+
+.possessiondate {
+  margin-left: 40%;
+}

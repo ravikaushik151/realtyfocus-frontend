@@ -6,12 +6,14 @@ import RootLayout from '@/components/layout/RootLayout';
 import ProjectSlider from '@/components/ProjectSlider';
 import { Button } from '@/components/ui/button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHouse, faKey, faBed, faHammer, faArrowsAlt } from '@fortawesome/free-solid-svg-icons';
+import { faHouse, faBed, faHammer, faArrowsAlt } from '@fortawesome/free-solid-svg-icons';
 
 // Components
 import Gallery from '@/components/microsite/Gallery';
 import FloorPlan from '@/components/microsite/FloorPlan';
 import MasterPlanImage from '@/components/microsite/MasterPlan';
+import PossessionList from '@/components/microsite/PossessionList';
+import SpecificationsAccordion from '@/components/microsite/SpecificationsAccordion';
 
 // Types
 interface Project {
@@ -51,20 +53,34 @@ export type ProjectDetailPageProps = {
 // Helper to convert CSV to image URL array
 const toUrlArray = (csv: string, base: string): string[] => {
   if (!csv) return [];
-  return csv.split(',').map(idOrUrl => {
-    const trimmed = idOrUrl.trim();
-    if (trimmed.startsWith("http")) return trimmed;
-    const hasValidExtension = /\.(jpg|jpeg|png|webp)$/i.test(trimmed);
-    return `${base}${trimmed}${hasValidExtension ? '' : '.jpg'}`;
-  }).filter(url => url);
+
+  return csv
+    .split(',')
+    .map((idOrUrl) => {
+      const trimmed = idOrUrl.trim();
+
+      // Check if it's a full URL
+      if (trimmed.startsWith("http")) {
+        return trimmed;
+      }
+
+      // Check for existing extension
+      const hasValidExtension = /\.(jpg|jpeg|png|webp)$/i.test(trimmed);
+
+      // Add default extension if none exists
+      return `${base}${trimmed}${!hasValidExtension ? '.jpg' : ''}`;
+    })
+    .filter(Boolean); // Remove empty strings or invalid URLs
 };
 
 // Main Page Component
 export default async function ProjectDetailPage({ params }: ProjectDetailPageProps) {
   const { slug } = await params;
 
-  // Fetch data
-  const res = await fetch(`https://api.realtyfocus.info/api/microsites/${slug}`, {
+
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+  const res = await fetch(`${API_BASE_URL}/microsites/${slug}`, {
     next: { revalidate: 60 },
   });
 
@@ -113,7 +129,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
     builderName: details.builderName ?? "House of Hiranandani",
     category: rawData.project_type ?? '',
     amenities: Array.isArray(amenities) ? amenities : [],
-    specifications: details.specifications ?? {},
+    specifications: rawData.specification ?? {},
   };
 
   return (
@@ -159,13 +175,6 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                     </div>
                   </li>
                   <li className="item">
-                    <div className="box-icon w-52"><FontAwesomeIcon icon={faKey} /></div>
-                    <div className="content">
-                      <span className="label">Possession:</span>
-                      <span>{project.possession}</span>
-                    </div>
-                  </li>
-                  <li className="item">
                     <div className="box-icon w-52"><FontAwesomeIcon icon={faBed} /></div>
                     <div className="content">
                       <span className="label">Builder:</span>
@@ -184,6 +193,11 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                     <div className="content">
                       <span className="label">Area:</span>
                       <span>{project.area}</span>
+                    </div>
+                  </li>
+                  <li className="item">
+                    <div className="content">
+                      <PossessionList project={project} />
                     </div>
                   </li>
                 </ul>
@@ -219,19 +233,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
               )}
 
               {/* Specifications */}
-              {project.specifications && Object.keys(project.specifications).length > 0 && (
-                <div className="bg-white p-6 rounded-md shadow-md mb-6" id="specifications">
-                  <h2 className="text-xl font-bold mb-4 text-realty-navy">Specifications</h2>
-                  <div className="space-y-4">
-                    {Object.entries(project.specifications).map(([key, value]) => (
-                      <div key={key}>
-                        <p className="font-semibold capitalize">{key}</p>
-                        <p className="text-gray-600">{value}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              <SpecificationsAccordion spec={project.specifications} />
 
               {/* Master Plan */}
               <MasterPlanImage imageUrl={project.masterPlan} />
@@ -279,16 +281,36 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
           </div>
         </div>
       </section>
-    </RootLayout>
+    </RootLayout >
   );
 }
 
 // Generate Static Params for Dynamic Routes
 export async function generateStaticParams() {
-  const res = await fetch('https://api.realtyfocus.info/api/microsites');
-  if (!res.ok) return [];
-  const data = await res.json();
-  return data.map(project => ({
-    slug: project.name.toLowerCase().replace(/\s+/g, '-')
-  }));
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+  // Ensure API_BASE_URL exists before making the request
+  if (!API_BASE_URL) {
+    console.warn("NEXT_PUBLIC_API_BASE_URL not set");
+    return [];
+  }
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/microsites`);
+
+    if (!res.ok) {
+      console.error("Failed to fetch microsites:", res.status);
+      return [];
+    }
+
+    const data = await res.json();
+
+    return data.map(project => ({
+      slug: project.name.toLowerCase().replace(/\s+/g, '-')
+    }));
+
+  } catch (error) {
+    console.error("Error fetching microsites:", error);
+    return [];
+  }
 }

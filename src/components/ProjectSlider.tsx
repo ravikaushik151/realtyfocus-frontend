@@ -15,6 +15,7 @@ export default function ProjectSlider({
     title,
     imageUrls,
 }: ProjectSliderProps) {
+    //console.log("Rendering URL:", imageUrls); // Check each URL being rendered
     return (
         <Swiper
             spaceBetween={10}

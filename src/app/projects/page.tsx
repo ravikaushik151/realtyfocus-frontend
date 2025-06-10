@@ -11,9 +11,6 @@ export default function ProjectsPage() {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [paginationGroup, setPaginationGroup] = useState(0); // group index for pagination buttons
-  const projectsPerPage = 6;
-  const pagesPerGroup = 10; // number of page buttons shown per group
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -30,19 +27,12 @@ export default function ProjectsPage() {
     fetchProjects();
   }, []);
 
-  // Pagination logic for projects
+  // Pagination logic
+  const projectsPerPage = 6;
   const totalPages = Math.ceil(projects.length / projectsPerPage);
   const indexOfLastProject = currentPage * projectsPerPage;
   const indexOfFirstProject = indexOfLastProject - projectsPerPage;
   const currentProjects = projects.slice(indexOfFirstProject, indexOfLastProject);
-
-  // Pagination buttons grouped by 10
-  const startPage = paginationGroup * pagesPerGroup + 1;
-  const endPage = Math.min(startPage + pagesPerGroup - 1, totalPages);
-  const pageNumbers = [];
-  for (let i = startPage; i <= endPage; i++) {
-    pageNumbers.push(i);
-  }
 
   const formatPrice = (value) => {
     if (!value || isNaN(value)) return 'N/A';
@@ -72,30 +62,11 @@ export default function ProjectsPage() {
     return `${monthShort}-${year}`;
   };
 
-
   function decodeHtml(html) {
     const txt = document.createElement('textarea');
     txt.innerHTML = html;
     return txt.value;
   }
-
-  // Handlers for Prev and Next group buttons
-  function handlePrevGroup() {
-    setPaginationGroup((prev) => Math.max(prev - 1, 0));
-  }
-  function handleNextGroup() {
-    if ((paginationGroup + 1) * pagesPerGroup < totalPages) {
-      setPaginationGroup((prev) => prev + 1);
-    }
-  }
-
-  // When currentPage changes, if it's outside the current paginationGroup, update paginationGroup accordingly
-  useEffect(() => {
-    const newGroup = Math.floor((currentPage - 1) / pagesPerGroup);
-    if (newGroup !== paginationGroup) {
-      setPaginationGroup(newGroup);
-    }
-  }, [currentPage]);
 
   return (
     <RootLayout>
@@ -180,8 +151,8 @@ export default function ProjectsPage() {
                       possession: formatDate(project.possession),
                       price: formatPriceRange(project.min_basic_cost, project.max_basic_cost),
                       imageUrl: project.featured_image,
-                      buildername: project.builder_name || 'N/A', // optional
-                      status: project.status, // optional
+                      buildername: project.builder_name || 'N/A',
+                      status: project.status,
                       slug: project.name?.toLowerCase().replace(/\s+/g, '-')
                     }}
                   />
@@ -192,38 +163,95 @@ export default function ProjectsPage() {
             </div>
           )}
 
-          {/* Pagination */}
-          <div className="flex justify-center items-center space-x-2 mt-10">
-            {/* Prev Group Button */}
-            <button
-              onClick={handlePrevGroup}
-              disabled={paginationGroup === 0}
-              className={`px-3 py-1 border rounded disabled:opacity-50`}
-            >
-              Prev
-            </button>
+          {/* Pagination UI */}
+          {totalPages > 1 && (
+            <div className="flex justify-center mt-10">
+              <nav className="inline-flex items-center space-x-2 text-sm">
+                {/* Previous Button */}
+                <button
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.max(prev - 1, 1))
+                  }
+                  disabled={currentPage === 1}
+                  className={`px-3 py-2 rounded-md ${currentPage === 1
+                      ? 'text-gray-400 pointer-events-none'
+                      : 'text-gray-600 hover:bg-gray-100'
+                    }`}
+                >
+                  Previous
+                </button>
 
-            {/* Page Numbers */}
-            {pageNumbers.map((num) => (
-              <button
-                key={num}
-                onClick={() => setCurrentPage(num)}
-                className={`w-10 h-10 border border-gray-300 flex items-center justify-center hover:bg-gray-100 ${currentPage === num ? 'bg-gray-200 font-semibold' : ''
-                  }`}
-              >
-                {num}
-              </button>
-            ))}
+                {/* Dynamic Page Buttons */}
+                {(() => {
+                  const sidePages = 2; // Show 2 before/after current
+                  const pageButtons = [];
 
-            {/* Next Group Button */}
-            <button
-              onClick={handleNextGroup}
-              disabled={(paginationGroup + 1) * pagesPerGroup >= totalPages}
-              className={`px-3 py-1 border rounded disabled:opacity-50`}
-            >
-              Next
-            </button>
-          </div>
+                  const renderButton = (pageNum) => (
+                    <button
+                      key={pageNum}
+                      onClick={() => setCurrentPage(pageNum)}
+                      className={`px-3 py-2 w-10 h-10 flex items-center justify-center rounded-md ${pageNum === currentPage
+                          ? 'bg-realty-red text-white'
+                          : 'text-gray-600 hover:bg-gray-100'
+                        }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+
+                  // Always show first page
+                  pageButtons.push(renderButton(1));
+
+                  let leftSide = Math.max(2, currentPage - sidePages);
+                  let rightSide = Math.min(totalPages - 1, currentPage + sidePages);
+
+                  // Add ellipsis between first and middle
+                  if (leftSide > 2) {
+                    pageButtons.push(
+                      <span key="ellipsis-start" className="px-3 py-2">
+                        ...
+                      </span>
+                    );
+                  }
+
+                  // Render middle buttons
+                  for (let i = leftSide; i <= rightSide; i++) {
+                    pageButtons.push(renderButton(i));
+                  }
+
+                  // Add ellipsis before last page if needed
+                  if (rightSide < totalPages - 1) {
+                    pageButtons.push(
+                      <span key="ellipsis-end" className="px-3 py-2">
+                        ...
+                      </span>
+                    );
+                  }
+
+                  // Always show last page
+                  if (totalPages > 1) {
+                    pageButtons.push(renderButton(totalPages));
+                  }
+
+                  return pageButtons;
+                })()}
+
+                {/* Next Button */}
+                <button
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                  }
+                  disabled={currentPage === totalPages}
+                  className={`px-3 py-2 rounded-md ${currentPage === totalPages
+                      ? 'text-gray-400 pointer-events-none'
+                      : 'text-gray-600 hover:bg-gray-100'
+                    }`}
+                >
+                  Next
+                </button>
+              </nav>
+            </div>
+          )}
         </div>
       </section>
     </RootLayout>

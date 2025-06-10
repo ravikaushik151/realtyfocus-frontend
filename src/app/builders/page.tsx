@@ -1,245 +1,227 @@
-import React from 'react';
-import RootLayout from '@/components/layout/RootLayout';
+'use client';
+
+import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Card, CardContent } from '@/components/ui/card';
+import { useSearchParams } from 'next/navigation';
+import { Card } from '@/components/ui/card';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
+import RootLayout from '@/components/layout/RootLayout';
 
-// Mock data for builders
-const builders = [
-  {
-    id: 1,
-    name: 'Brigade Group',
-    logo: '/images/builder-logo.jpeg',
-    description: `Brigade Group, one of India's leading property developers, has been transforming cityscapes across South India with its developments across Residential, Commercial, Retail, Hospitality and Education sectors.`,
-    established: '1986',
-    completedProjects: '250+',
-    ongoingProjects: '30+',
-    locations: ['Bangalore', 'Chennai', 'Hyderabad', 'Mysore', 'Kochi'],
-    slug: 'brigade-group'
-  },
-  {
-    id: 2,
-    name: 'Prestige Group',
-    logo: '/images/builder-logo.jpeg',
-    description: `The Prestige Group has cemented its place as one of India's leading real estate developers, having completed more than 247 projects covering over 134 million sq ft.`,
-    established: '1986',
-    completedProjects: '247+',
-    ongoingProjects: '45+',
-    locations: ['Bangalore', 'Chennai', 'Hyderabad', 'Goa', 'Mangalore', 'Kochi'],
-    slug: 'prestige-group'
-  },
-  {
-    id: 3,
-    name: 'Sobha Developers',
-    logo: '/images/builder-logo.jpeg',
-    description: `Sobha Limited is one of the fastest growing and foremost backward integrated real estate players in the country. The company has a pan India presence with focus on residential and contractual projects.`,
-    established: '1995',
-    completedProjects: '140+',
-    ongoingProjects: '25+',
-    locations: ['Bangalore', 'Gurgaon', 'Chennai', 'Pune', 'Coimbatore'],
-    slug: 'sobha-developers'
-  },
-  {
-    id: 4,
-    name: 'Puravankara',
-    logo: '/images/builder-logo.jpeg',
-    description: `Puravankara Limited is one of India's leading listed real estate companies, with presence in Bangalore, Kochi, Chennai, Coimbatore, Mangaluru, Hyderabad, Mysore, Mumbai and Pune.`,
-    established: '1975',
-    completedProjects: '75+',
-    ongoingProjects: '22+',
-    locations: ['Bangalore', 'Chennai', 'Hyderabad', 'Kochi', 'Pune', 'Mumbai'],
-    slug: 'puravankara'
-  },
-  {
-    id: 5,
-    name: 'Shriram Properties',
-    logo: '/images/builder-logo.jpeg',
-    description: 'Shriram Properties is a leading residential real estate development company in South India, primarily focused on the mid-market and affordable housing categories.',
-    established: '2000',
-    completedProjects: '30+',
-    ongoingProjects: '15+',
-    locations: ['Bangalore', 'Chennai', 'Coimbatore', 'Visakhapatnam'],
-    slug: 'shriram-properties'
-  },
-  {
-    id: 6,
-    name: 'Godrej Group',
-    logo: '/images/builder-logo.jpeg',
-    description: 'Godrej Properties brings the Godrej Group philosophy of innovation, sustainability, and excellence to the real estate industry.',
-    established: '1990',
-    completedProjects: '100+',
-    ongoingProjects: '35+',
-    locations: ['Bangalore', 'Mumbai', 'Pune', 'NCR', 'Ahmedabad', 'Kolkata'],
-    slug: 'godrej-group'
-  },
-  {
-    id: 7,
-    name: 'Assetz Homes',
-    logo: '/images/builder-logo.jpeg',
-    description: 'Assetz is a Singapore-based multi-faceted property development company focusing on Residential, Commercial and Warehousing assets.',
-    established: '2006',
-    completedProjects: '20+',
-    ongoingProjects: '10+',
-    locations: ['Bangalore'],
-    slug: 'assetz-homes'
-  },
-  {
-    id: 8,
-    name: 'Ds-max Properties',
-    logo: '/images/builder-logo.jpeg',
-    description: 'DS-MAX Properties is one of the fastest growing real estate companies in Bangalore. The company has successfully completed numerous residential projects across the city.',
-    established: '2007',
-    completedProjects: '80+',
-    ongoingProjects: '15+',
-    locations: ['Bangalore'],
-    slug: 'ds-max-properties'
-  },
-  {
-    id: 9,
-    name: 'Salarpuria Sattva Group',
-    logo: '/images/builder-logo.jpeg',
-    description: 'Salarpuria Sattva Group is a leading property development, management and consulting company in India.',
-    established: '1986',
-    completedProjects: '120+',
-    ongoingProjects: '30+',
-    locations: ['Bangalore', 'Hyderabad', 'Pune', 'Kolkata', 'Jaipur', 'Goa'],
-    slug: 'sattva-group'
-  },
-  {
-    id: 10,
-    name: 'Adarsh Developers',
-    logo: '/images/builder-logo.jpeg',
-    description: 'Adarsh Developers has been at the forefront of creating landmark residential projects in Bangalore.',
-    established: '1988',
-    completedProjects: '40+',
-    ongoingProjects: '12+',
-    locations: ['Bangalore'],
-    slug: 'adarsh-developers'
-  },
-  {
-    id: 11,
-    name: 'Mahaveer Group',
-    logo: '/images/builder-logo.jpeg',
-    description: 'Mahaveer Group has established itself as one of the most reputed builders in Bangalore.',
-    established: '1994',
-    completedProjects: '35+',
-    ongoingProjects: '8+',
-    locations: ['Bangalore'],
-    slug: 'mahaveer-group'
-  },
-  {
-    id: 12,
-    name: 'Century Real Estate',
-    logo: '/images/builder-logo.jpeg',
-    description: 'Century Real Estate is one of the oldest and most trusted real estate companies in India.',
-    established: '1973',
-    completedProjects: '50+',
-    ongoingProjects: '10+',
-    locations: ['Bangalore'],
-    slug: 'century-real-estate'
-  }
-];
+// Helpers
+const toImageUrl = (imagePath: string | undefined): string =>
+    !imagePath ? '/builder-logo.jpeg' :
+        imagePath.startsWith('http') ? imagePath :
+            `https://www.realtyfocus.info/images/builder/${imagePath}`;
 
-export default function BuildersPage() {
-  return (
-    <RootLayout>
-      {/* Header Banner */}
-      <div className="relative bg-realty-darkNavy py-16">
-        <div className="container mx-auto px-4 text-white">
-          <h1 className="text-3xl font-bold text-center">
-            Top Builders in Bangalore
-          </h1>
-          <p className="text-center mt-2">List of the most prestigious real estate developers in Bangalore</p>
-        </div>
-      </div>
+const stripHtmlTags = (html: string): string =>
+    html?.replace(/(<([^>]+)>)/gi, '').replace(/&nbsp;/g, ' ') || '';
 
-      {/* Builders Section */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {builders.map((builder) => (
-              <Card key={builder.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                <div className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <h3 className="text-xl font-bold text-realty-navy">
-                        <Link href={`/builders/${builder.slug}`} className="hover:text-realty-red transition-colors">
-                          {builder.name}
-                        </Link>
-                      </h3>
-                      <p className="text-sm text-gray-500">Est. {builder.established}</p>
-                    </div>
-                    <div className="w-16 h-16 relative">
-                      <Image 
-                        src={builder.logo}
-                        alt={builder.name}
-                        width={64}
-                        height={64}
-                        className="object-contain"
-                      />
-                    </div>
-                  </div>
-                  
-                  <p className="text-gray-600 text-sm line-clamp-3 mb-4">
-                    {builder.description}
-                  </p>
-                  
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {builder.locations.slice(0, 3).map((location, index) => (
-                      <span key={index} className="text-xs bg-gray-100 px-2 py-1 rounded">
-                        {location}
-                      </span>
-                    ))}
-                    {builder.locations.length > 3 && (
-                      <span className="text-xs bg-gray-100 px-2 py-1 rounded">
-                        +{builder.locations.length - 3} more
-                      </span>
-                    )}
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div>
-                      <p className="text-gray-500">Completed Projects</p>
-                      <p className="font-semibold">{builder.completedProjects}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-500">Ongoing Projects</p>
-                      <p className="font-semibold">{builder.ongoingProjects}</p>
-                    </div>
-                  </div>
+export default function BuilderList() {
+    const searchParams = useSearchParams();
+    const page = Math.max(parseInt(searchParams.get('page') || '1', 10), 1);
+    const limit = 9;
 
-                  <div className="flex justify-end mt-4">
-                    <Link 
-                      href={`/builders/${builder.slug}`}
-                      className="text-realty-red text-sm hover:underline"
-                    >
-                      View Projects
-                    </Link>
-                  </div>
+    const [builders, setBuilders] = useState([]);
+    const [total, setTotal] = useState(0);
+
+    useEffect(() => {
+        const fetchBuilders = async () => {
+            try {
+                const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+                const res = await fetch(`${API_BASE_URL}/builders`);
+                const data = await res.json();
+                setBuilders(data);
+                setTotal(data.length);
+            } catch (error) {
+                console.error('Failed to fetch builders:', error);
+            }
+        };
+
+        fetchBuilders();
+    }, []);
+
+    const totalPages = Math.ceil(total / limit);
+    const paginatedBuilders = builders.slice((page - 1) * limit, page * limit);
+
+    return (
+        <RootLayout>
+            <div className="bg-realty-darkNavy py-16 text-white text-center">
+                <h1 className="text-3xl font-bold">Top Builders in Bangalore</h1>
+                <p>List of the most prestigious real estate developers in Bangalore</p>
+            </div>
+
+            <section className="py-16">
+                <div className="container mx-auto px-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {paginatedBuilders.length > 0 ? (
+                            paginatedBuilders.map((builder) => (
+                                <Card key={builder.builder_id} className="p-6 hover:shadow-lg transition-shadow">
+                                    <div className="flex justify-between items-center mb-4">
+                                        <div>
+                                            <h3 className="text-xl font-bold text-realty-navy">
+                                                <Link
+                                                    href={`/builders/${encodeURIComponent(
+                                                        builder.name?.toLowerCase().replace(/\s+/g, '-')
+                                                    )}`}
+                                                    className="hover:text-realty-red transition-colors"
+                                                >
+                                                    {builder.name
+                                                        ?.toLowerCase()
+                                                        .split(' ')
+                                                        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+                                                        .join(' ')}
+                                                </Link>
+                                            </h3>
+                                            <p className="text-sm text-gray-500 flex items-center">
+                                                <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-2 text-red-500" />
+                                                {stripHtmlTags(builder.address)}
+                                            </p>
+                                        </div>
+                                        <Image
+                                            src={toImageUrl(builder.logo)}
+                                            alt={builder.name}
+                                            width={64}
+                                            height={60}
+                                            className="rounded object-contain"
+                                        />
+                                    </div>
+
+                                    <p className="text-sm text-gray-600 line-clamp-3 mb-4">
+                                        {stripHtmlTags(builder.about)}
+                                    </p>
+
+                                    <div className="flex flex-wrap gap-2 mb-4">
+                                        {(builder.locations || []).slice(0, 3).map((loc, idx) => (
+                                            <span key={idx} className="text-xs bg-gray-100 px-2 py-1 rounded">{loc}</span>
+                                        ))}
+                                        {(builder.locations || []).length > 3 && (
+                                            <span className="text-xs bg-gray-100 px-2 py-1 rounded">
+                                                +{builder.locations.length - 3} more
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    <div className="grid grid-cols-2 text-sm gap-2">
+                                        <div>
+                                            <p className="text-gray-500">Completed Projects</p>
+                                            <p className="font-semibold">{builder.completed_projects || 'N/A'}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-gray-500">Ongoing Projects</p>
+                                            <p className="font-semibold">{builder.ongoing_projects || 'N/A'}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex justify-end mt-4">
+                                        <Link
+                                            href={`/builders/${encodeURIComponent(builder.name?.toLowerCase().replace(/\s+/g, '-'))}`}
+                                            className="text-realty-red text-sm hover:underline"
+                                        >
+                                            View Projects
+                                        </Link>
+                                    </div>
+                                </Card>
+                            ))
+                        ) : (
+                            <p className="col-span-full text-center">No builders found.</p>
+                        )}
+                    </div>
+
+                    {/* Pagination */}
+                    {/* Smart Pagination */}
+                    <div className="flex justify-center mt-10">
+                        <nav className="inline-flex space-x-2">
+                            {/* Previous Button */}
+                            <Link
+                                href={`/builders?page=${page - 1}`}
+                                className={`px-3 py-2 rounded ${page <= 1 ? 'text-gray-400 pointer-events-none' : 'hover:bg-gray-100'}`}
+                            >
+                                Previous
+                            </Link>
+
+                            {/* Dynamic Page Buttons */}
+                            {(() => {
+                                const sidePages = 2; // Show 2 before & after current
+                                const buttons = [];
+                                const totalPagesToShow = 7; // Max visible buttons including ellipses
+
+                                let start = Math.max(2, page - sidePages);
+                                let end = Math.min(totalPages - 1, page + sidePages);
+
+                                // Always show first page
+                                buttons.push(
+                                    <Link
+                                        key={1}
+                                        href="/builders?page=1"
+                                        className={`px-3 py-2 w-10 h-10 flex items-center justify-center rounded-md ${page === 1 ? 'bg-realty-red text-white' : 'hover:bg-gray-100'
+                                            }`}
+                                    >
+                                        1
+                                    </Link>
+                                );
+
+                                // Add ellipsis between first and middle
+                                if (start > 2) {
+                                    buttons.push(
+                                        <span key="dots-start" className="px-3 py-2">
+                                            ...
+                                        </span>
+                                    );
+                                }
+
+                                // Render nearby pages
+                                for (let i = start; i <= end; i++) {
+                                    buttons.push(
+                                        <Link
+                                            key={i}
+                                            href={`/builders?page=${i}`}
+                                            className={`px-3 py-2 w-10 h-10 flex items-center justify-center rounded-md ${page === i ? 'bg-realty-red text-white' : 'hover:bg-gray-100'
+                                                }`}
+                                        >
+                                            {i}
+                                        </Link>
+                                    );
+                                }
+
+                                // Add ellipsis before last page if needed
+                                if (end < totalPages - 1) {
+                                    buttons.push(
+                                        <span key="dots-end" className="px-3 py-2">
+                                            ...
+                                        </span>
+                                    );
+                                }
+
+                                // Always show last page
+                                if (totalPages > 1) {
+                                    buttons.push(
+                                        <Link
+                                            key={totalPages}
+                                            href={`/builders?page=${totalPages}`}
+                                            className={`px-3 py-2 w-10 h-10 flex items-center justify-center rounded-md ${page === totalPages ? 'bg-realty-red text-white' : 'hover:bg-gray-100'
+                                                }`}
+                                        >
+                                            {totalPages}
+                                        </Link>
+                                    );
+                                }
+
+                                return buttons;
+                            })()}
+
+                            {/* Next Button */}
+                            <Link
+                                href={`/builders?page=${page + 1}`}
+                                className={`px-3 py-2 rounded ${page >= totalPages ? 'text-gray-400 pointer-events-none' : 'hover:bg-gray-100'}`}
+                            >
+                                Next
+                            </Link>
+                        </nav>
+                    </div>
                 </div>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* About Builders */}
-      <section className="py-16 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <h2 className="section-heading">About Top Builders in Bangalore</h2>
-          <div className="max-w-4xl mx-auto text-gray-600">
-            <p className="mb-4">
-              Bangalore, also known as the Silicon Valley of India, has witnessed tremendous growth in its real estate sector over the years. The city's booming IT industry, pleasant climate, and cosmopolitan culture have made it a preferred destination for homebuyers and investors alike.
-            </p>
-            <p className="mb-4">
-              Realty Focus brings you a comprehensive list of the top builders in Bangalore who have contributed significantly to the city's skyline. These developers are known for their quality construction, innovative designs, timely delivery, and customer satisfaction.
-            </p>
-            <p>
-              Explore our curated list of top builders and discover the right developer for your next property investment in Bangalore.
-            </p>
-          </div>
-        </div>
-      </section>
-    </RootLayout>
-  );
+            </section>
+        </RootLayout>
+    );
 }

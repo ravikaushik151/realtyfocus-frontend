@@ -16,6 +16,17 @@ const stripHtmlTags = (html: string | undefined): string => {
     return html.replace(/(<([^>]+)>)/gi, '').replace(/&nbsp;/g, ' ').trim();
 };
 
+// Define types
+interface BuilderApiResponse {
+    builder_id: number;
+    name: string;
+    about?: string;
+    address?: string;
+    logo?: string;
+    completed_projects?: number | null;
+    ongoing_projects?: number | null;
+}
+
 // ⬇️ Required for `output: export`
 export async function generateStaticParams() {
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/api';
@@ -23,10 +34,11 @@ export async function generateStaticParams() {
     try {
         const res = await fetch(`${API_BASE_URL}/builders`, { cache: 'no-store' });
         if (!res.ok) throw new Error('Failed to fetch builders');
-        const builders = await res.json();
 
-        return builders.map((builder: any) => ({
-            slug: builder.name?.toLowerCase().replace(/\s+/g, '-'),
+        const builders: BuilderApiResponse[] = await res.json();
+
+        return builders.map((builder) => ({
+            slug: builder.name?.toLowerCase().replace(/\s+/g, '-') || '',
         }));
     } catch (err) {
         console.error("generateStaticParams error:", err);
@@ -35,19 +47,22 @@ export async function generateStaticParams() {
 }
 
 // Fetch builder by slug
-async function getBuilderBySlug(slug: string) {
+async function getBuilderBySlug(slug: string): Promise<BuilderApiResponse | null> {
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/api';
 
     try {
         const res = await fetch(`${API_BASE_URL}/builders`, { cache: 'no-store' });
         if (!res.ok) throw new Error('Failed to load builders');
-        const builders = await res.json();
+
+        const builders: BuilderApiResponse[] = await res.json();
 
         const builderName = slug.replace(/-/g, ' ').toLowerCase();
-        return builders.find(
-            (builder: any) =>
-                builder.name?.toLowerCase() === builderName ||
-                builder.name?.toLowerCase().replace(/\s+/g, '-') === slug
+        return (
+            builders.find(
+                (builder) =>
+                    builder.name?.toLowerCase() === builderName ||
+                    builder.name?.toLowerCase().replace(/\s+/g, '-') === slug
+            ) || null
         );
     } catch (error) {
         console.error('Error fetching builder:', error);
@@ -81,8 +96,9 @@ export default async function BuilderDetailPage({ params }: { params: { slug: st
                             <Image
                                 src={toImageUrl(builder.logo)}
                                 alt={builder.name || "Builder Logo"}
+                                width={100}
+                                height={100}
                                 className="img-fluid rounded shadow-sm"
-                                style={{ maxHeight: '150px' }}
                             />
                         </div>
                         <div className="col-md-9">
@@ -91,7 +107,7 @@ export default async function BuilderDetailPage({ params }: { params: { slug: st
                                     ? builder.name
                                         .toLowerCase()
                                         .split(' ')
-                                        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                                        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
                                         .join(' ')
                                     : 'Builder Name'}
                             </h1>
@@ -110,23 +126,21 @@ export default async function BuilderDetailPage({ params }: { params: { slug: st
                         <p>{stripHtmlTags(builder.address)}</p>
                     </div>
 
-
                     {/* Projects */}
                     <div className="row">
                         <div className="col-md-6">
                             <div className="card shadow-sm p-4 mb-4">
                                 <h3 className="h6 fw-bold mb-3">Completed Projects</h3>
-                                <p>{builder.completed_projects || 'N/A'}</p>
+                                <p>{builder.completed_projects ?? 'N/A'}</p>
                             </div>
                         </div>
                         <div className="col-md-6">
                             <div className="card shadow-sm p-4 mb-4">
                                 <h3 className="h6 fw-bold mb-3">Ongoing Projects</h3>
-                                <p>{builder.ongoing_projects || 'N/A'}</p>
+                                <p>{builder.ongoing_projects ?? 'N/A'}</p>
                             </div>
                         </div>
                     </div>
-
 
                     {/* Back */}
                     <div className="text-center mt-4">

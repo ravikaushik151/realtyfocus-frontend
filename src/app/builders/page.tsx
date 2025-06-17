@@ -15,8 +15,10 @@ const toImageUrl = (imagePath: string | undefined): string =>
         imagePath.startsWith('http') ? imagePath :
             `https://www.realtyfocus.info/images/builder/${imagePath}`;
 
+
 const stripHtmlTags = (html: string): string =>
     html?.replace(/(<([^>]+)>)/gi, '').replace(/&nbsp;/g, ' ') || '';
+
 
 export default function BuilderList() {
     const searchParams = useSearchParams();

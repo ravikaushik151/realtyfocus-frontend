@@ -37,7 +37,7 @@ export default function SpecificationsAccordion({ spec }: Props) {
                             className="py-4 px-4 w-full text-left flex justify-between items-center focus:outline-none text-white bg-[#bf2733]"
                         >
                             <span className="text-lg font-semibold capitalize">{item.name}</span>
-                            <span className="text-xl">{openIndex === index ? '−' : '+'}</span>
+                            <span className="text-xl">{openIndex === index ? '-' : '+'}</span>
                         </button>
 
                         {openIndex === index && (

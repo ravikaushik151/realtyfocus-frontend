@@ -106,6 +106,11 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   const amenities = rawData.amenities || [];
   const name = rawData.name || "Unknown Project";
 
+  const specificationsArray = Object.entries(rawData.specification || {}).map(([name, description]) => ({
+    name,
+    description,
+  }));
+
   const project: Project = {
     id: rawData.micro_id ?? 0,
     slug: name.toLowerCase().replace(/\s+/g, '-'),

@@ -32,7 +32,7 @@ export default function SpecificationsAccordion({ spec }: Props) {
             <h2 className="text-xl font-bold mb-4 text-realty-navy">Specifications</h2>
             <div className="divide-y divide-gray-200">
                 {spec.map((item, index) => (
-                    <div key={index} className="">
+                    <div key={index}>
                         <button
                             onClick={() => toggle(index)}
                             className="py-4 px-4 w-full text-left flex justify-between items-center focus:outline-none text-white bg-[#bf2733]"

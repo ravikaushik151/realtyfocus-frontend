@@ -10,13 +10,15 @@ export async function generateStaticParams() {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/microsites/all`);
     const projects = await res.json();
 
-    const uniqueLocations = [...new Set(
-        projects
-            .filter(project => project.location)
-            .map(project =>
-                project.location.toLowerCase().replace(/\s+/g, '-')
-            )
-    )];
+    const uniqueLocations = Array.from(
+        new Set(
+            projects
+                .filter(project => Boolean(project?.location))
+                .map(project =>
+                    project.location.toLowerCase().replace(/\s+/g, '-')
+                )
+        )
+    );
 
     return uniqueLocations.map(slug => ({ slug }));
 }

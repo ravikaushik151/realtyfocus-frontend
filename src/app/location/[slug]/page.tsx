@@ -23,6 +23,7 @@ export async function generateStaticParams() {
     return uniqueLocations.map(slug => ({ slug }));
 }
 
+
 export default async function LocationPage({ params }: LocationPageProps) {
     // ✅ Await params
     const { slug } = await params;

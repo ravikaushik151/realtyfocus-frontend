@@ -18,8 +18,8 @@ const stripHtmlTags = (html: string): string =>
 interface Builder {
     builder_id: number;
     name: string;
-    address?: string;
-    about?: string;
+    address?: string | null;
+    about?: string | null;
     logo?: string | null;
     completed_projects?: number | null;
     ongoing_projects?: number | null;
@@ -35,7 +35,7 @@ export default function BuilderList({ currentPage = 1 }: { currentPage: number }
             try {
                 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
                 const res = await fetch(`${API_BASE_URL}/builders`);
-                const data = await res.json();
+                const data: Builder[] = await res.json();
                 setBuilders(data);
                 setTotal(data.length);
             } catch (error) {

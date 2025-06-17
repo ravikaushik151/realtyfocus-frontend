@@ -15,6 +15,7 @@ const toImageUrl = (imagePath: string | undefined): string =>
 const stripHtmlTags = (html: string): string =>
     html?.replace(/(<([^>]+)>)/gi, '').replace(/&nbsp;/g, ' ') || '';
 
+// ✅ Proper Type Definition
 interface Builder {
     builder_id: number;
     name: string;

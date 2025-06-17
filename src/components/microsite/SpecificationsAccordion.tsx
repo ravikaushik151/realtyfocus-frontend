@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import Image from 'next/image';
 
 interface Specification {
     name: string;
@@ -43,14 +44,17 @@ export default function SpecificationsAccordion({ spec }: Props) {
                         {openIndex === index && (
                             <div className="mt-3 pl-2">
                                 {item.image && (
-                                    <img
+                                    <Image
                                         src={
                                             item.image.startsWith('http')
                                                 ? item.image
                                                 : `https://realtyfocus.info/images/specification/${item.image}`
                                         }
                                         alt={item.name || 'Specification'}
+                                        width={160}
+                                        height={160}
                                         className="w-40 h-40 object-cover rounded mb-2"
+                                        unoptimized
                                     />
                                 )}
                                 <p

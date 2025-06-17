@@ -15,9 +15,19 @@ const toImageUrl = (imagePath: string | undefined): string =>
 const stripHtmlTags = (html: string): string =>
     html?.replace(/(<([^>]+)>)/gi, '').replace(/&nbsp;/g, ' ') || '';
 
+interface Builder {
+    builder_id: number;
+    name: string;
+    address?: string;
+    about?: string;
+    logo?: string | null;
+    completed_projects?: number | null;
+    ongoing_projects?: number | null;
+}
+
 export default function BuilderList({ currentPage = 1 }: { currentPage: number }) {
     const limit = 9;
-    const [builders, setBuilders] = useState([]);
+    const [builders, setBuilders] = useState<Builder[]>([]);
     const [total, setTotal] = useState(0);
 
     useEffect(() => {

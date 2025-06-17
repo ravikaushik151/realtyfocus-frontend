@@ -1,9 +1,7 @@
 'use client';
-
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
 import { Card } from '@/components/ui/card';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
@@ -15,16 +13,10 @@ const toImageUrl = (imagePath: string | undefined): string =>
         imagePath.startsWith('http') ? imagePath :
             `https://www.realtyfocus.info/images/builder/${imagePath}`;
 
-
 const stripHtmlTags = (html: string): string =>
     html?.replace(/(<([^>]+)>)/gi, '').replace(/&nbsp;/g, ' ') || '';
 
-
-export default function BuilderList() {
-    const searchParams = useSearchParams();
-    const page = Math.max(parseInt(searchParams.get('page') || '1', 10), 1);
-    const limit = 9;
-
+export default function Builder() {
     const [builders, setBuilders] = useState([]);
     const [total, setTotal] = useState(0);
 
@@ -40,12 +32,8 @@ export default function BuilderList() {
                 console.error('Failed to fetch builders:', error);
             }
         };
-
         fetchBuilders();
     }, []);
-
-    const totalPages = Math.ceil(total / limit);
-    const paginatedBuilders = builders.slice((page - 1) * limit, page * limit);
 
     return (
         <RootLayout>
@@ -57,8 +45,8 @@ export default function BuilderList() {
             <section className="py-16">
                 <div className="container mx-auto px-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {paginatedBuilders.length > 0 ? (
-                            paginatedBuilders.map((builder) => (
+                        {builders.length > 0 ? (
+                            builders.map((builder) => (
                                 <Card key={builder.builder_id} className="p-6 hover:shadow-lg transition-shadow">
                                     <div className="flex justify-between items-center mb-4">
                                         <div>
@@ -89,11 +77,9 @@ export default function BuilderList() {
                                             className="rounded object-contain"
                                         />
                                     </div>
-
                                     <p className="text-sm text-gray-600 line-clamp-3 mb-4">
                                         {stripHtmlTags(builder.about)}
                                     </p>
-
                                     <div className="flex flex-wrap gap-2 mb-4">
                                         {(builder.locations || []).slice(0, 3).map((loc, idx) => (
                                             <span key={idx} className="text-xs bg-gray-100 px-2 py-1 rounded">{loc}</span>
@@ -104,7 +90,6 @@ export default function BuilderList() {
                                             </span>
                                         )}
                                     </div>
-
                                     <div className="grid grid-cols-2 text-sm gap-2">
                                         <div>
                                             <p className="text-gray-500">Completed Projects</p>
@@ -115,7 +100,6 @@ export default function BuilderList() {
                                             <p className="font-semibold">{builder.ongoing_projects || 'N/A'}</p>
                                         </div>
                                     </div>
-
                                     <div className="flex justify-end mt-4">
                                         <Link
                                             href={`/builders/${encodeURIComponent(builder.name?.toLowerCase().replace(/\s+/g, '-'))}`}
@@ -129,85 +113,6 @@ export default function BuilderList() {
                         ) : (
                             <p className="col-span-full text-center">No builders found.</p>
                         )}
-                    </div>
-
-                    {/* Smart Pagination */}
-                    <div className="flex justify-center mt-10">
-                        <nav className="inline-flex space-x-2">
-                            {/* Previous Button */}
-                            <Link
-                                href={`/builders?page=${page - 1}`}
-                                className={`px-3 py-2 rounded ${page <= 1 ? 'text-gray-400 pointer-events-none' : 'hover:bg-gray-100'}`}
-                            >
-                                Previous
-                            </Link>
-
-                            {/* Dynamic Page Buttons */}
-                            {(() => {
-                                const sidePages = 2; // Show 2 before & after current
-                                const buttons = [];
-                                const totalPagesToShow = 7;
-
-                                const start = Math.max(2, page - sidePages);
-                                const end = Math.min(totalPages - 1, page + sidePages);
-
-                                buttons.push(
-                                    <Link
-                                        key={1}
-                                        href="/builders?page=1"
-                                        className={`px-3 py-2 w-10 h-10 flex items-center justify-center rounded-md ${page === 1 ? 'bg-realty-red text-white' : 'hover:bg-gray-100'
-                                            }`}
-                                    >
-                                        1
-                                    </Link>
-                                );
-
-                                if (start > 2) {
-                                    buttons.push(<span key="dots-start" className="px-3 py-2">...</span>);
-                                }
-
-                                for (let i = start; i <= end; i++) {
-                                    buttons.push(
-                                        <Link
-                                            key={i}
-                                            href={`/builders?page=${i}`}
-                                            className={`px-3 py-2 w-10 h-10 flex items-center justify-center rounded-md ${page === i ? 'bg-realty-red text-white' : 'hover:bg-gray-100'
-                                                }`}
-                                        >
-                                            {i}
-                                        </Link>
-                                    );
-                                }
-
-                                if (end < totalPages - 1) {
-                                    buttons.push(<span key="dots-end" className="px-3 py-2">...</span>);
-                                }
-
-                                if (totalPages > 1) {
-                                    buttons.push(
-                                        <Link
-                                            key={totalPages}
-                                            href={`/builders?page=${totalPages}`}
-                                            className={`px-3 py-2 w-10 h-10 flex items-center justify-center rounded-md ${page === totalPages ? 'bg-realty-red text-white' : 'hover:bg-gray-100'
-                                                }`}
-                                        >
-                                            {totalPages}
-                                        </Link>
-                                    );
-                                }
-
-                                return buttons;
-                            })()}
-
-                            {/* Next Button */}
-                            <Link
-                                href={`/builders?page=${page + 1}`}
-                                className={`px-3 py-2 rounded ${page >= totalPages ? 'text-gray-400 pointer-events-none' : 'hover:bg-gray-100'
-                                    }`}
-                            >
-                                Next
-                            </Link>
-                        </nav>
                     </div>
                 </div>
             </section>

@@ -229,6 +229,11 @@ const Footer = () => {
             <h3 className="footer-heading mt-6">CLASSIFICATION</h3>
             <ul className="space-y-2">
               <li>
+                <Link href="/classification/1bhk" className="footer-link text-sm flex items-center">
+                  <span className="mr-2">◾</span> 1 BHK
+                </Link>
+              </li>
+              <li>
                 <Link href="/classification/2bhk" className="footer-link text-sm flex items-center">
                   <span className="mr-2">◾</span> 2 BHK
                 </Link>

@@ -232,8 +232,8 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                 </div>
               )}
 
-              {/* Specifications */}
-              <SpecificationsAccordion spec={project.specifications} />
+              {/* Specifications 
+              <SpecificationsAccordion spec={project.specifications} />*/}
 
               {/* Master Plan */}
               <MasterPlanImage imageUrl={project.masterPlan} />

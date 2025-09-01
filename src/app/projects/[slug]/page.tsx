@@ -146,7 +146,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
               </div>
             </div>
             <div className="mt-4 md:mt-0">
-              <div className="text-2xl font-bold">Price here</div>
+              <div className="text-2xl font-bold">{project?.price[0]?.type}</div>
             </div>
           </div>
         </div>

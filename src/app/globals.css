@@ -252,3 +252,13 @@ html {
 .possessiondate {
   margin-left: 40%;
 }
+
+/* Swiper Pagination Dots */
+.swiper-pagination-bullet {
+  background: #fff !important;
+  opacity: 0.6;
+}
+.swiper-pagination-bullet-active {
+  background: #e11d48 !important; /* Use your primary color */
+  opacity: 1;
+}
